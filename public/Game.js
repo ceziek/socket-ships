@@ -47,13 +47,6 @@ export default class Game {
         });
     }
 
-    isChanged(player) {
-        let playerStr = JSON.stringify(player.state);
-        let stateStr = JSON.stringify(this.state.state[player.id]);
-
-        return playerStr !== stateStr;
-    }
-
     step() {
         const state = Object.assign({}, this.state.state);
 
@@ -100,5 +93,12 @@ export default class Game {
         // }
 
         requestAnimationFrame(this.start.bind(this));
+    }
+
+    isChanged(entity) {
+        let playerStr = JSON.stringify(entity.state);
+        let stateStr = JSON.stringify(this.state.state[entity.id]);
+
+        return playerStr !== stateStr;
     }
 }
