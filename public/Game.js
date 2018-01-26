@@ -67,7 +67,6 @@ export default class Game {
         });
 
         this.socket.on('update', (data) => {
-            console.log(this.socket.id);
             this.state.update(data);
         });
 
@@ -84,7 +83,6 @@ export default class Game {
             y: 50,
             width: 50,
             height: 50,
-            keyState: {}
         };
 
         this.entities[id] = new Player(id, initialPlayerState, true);
@@ -118,9 +116,7 @@ export default class Game {
                     this.state.update(data);
 
                     if (this.entities[key].controllable) {
-                        console.log(key, 'controllable')
                         this.socket.emit('update', data);
-                        console.log('update :', data)
                     }
                 }
             }
@@ -137,10 +133,6 @@ export default class Game {
                 this.entities[key].draw(this.ctx);
             }
         }
-
-        // if (!checkCollision(player.points, obstacle.points)) {
-        //     console.log('boom')
-        // }
 
         requestAnimationFrame(this.start.bind(this));
     }

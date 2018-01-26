@@ -37,14 +37,6 @@ const state = new State();
 
 io.on('connection', (socket) => {
     console.log('connected');
-    console.log('connected', state.state);
-
-
-    socket.on('disconnect', () => {
-        console.log('disconnected', state.state);
-        state.destroy(socket.id);
-        io.emit('destroy', socket.id);
-    });
 
     socket.on('init', (data) => {
         state.update(data);
@@ -58,5 +50,11 @@ io.on('connection', (socket) => {
         state.update(data);
         socket.broadcast.emit('update', data);
         console.log('update', state.state);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('disconnected');
+        state.destroy(socket.id);
+        socket.broadcast.emit('destroy', socket.id);
     });
 });

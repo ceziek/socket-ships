@@ -1,5 +1,5 @@
 export default class Player {
-    constructor(id, {x, y, width, height, keyState, angle = 0, throttle = 0, deviation = 0}, controllable) {
+    constructor(id, {x, y, width, height, keyState = {}, angle = 0, throttle = 0, deviation = 0}, controllable) {
         this.id = id;
 
         this.state = {
@@ -93,18 +93,6 @@ export default class Player {
         this.rotate(this.controllable ? null : this.state.angle);
 
         const keyState = Object.assign({}, this.state.keyState);
-
-        if (
-            !keyState.hasOwnProperty('ArrowDown') &&
-            !keyState.hasOwnProperty('ArrowUp') &&
-            this.state.throttle !== 0
-        ) {
-            if (this.state.throttle > 0) {
-                this.state.throttle -= 1;
-            } else {
-                this.state.throttle += 1;
-            }
-        }
 
         if (
             !keyState.hasOwnProperty('ArrowDown') &&
