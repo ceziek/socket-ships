@@ -7,37 +7,67 @@ export default class Game {
         this.socket = socket;
         this.entities = {};
 
-        this.events();
+        this.init();
+
+
+        this.socketEvents();
+        this.keyEvents();
     }
 
-    events() {
-        this.socket.on('connect', () => {
-            let id = this.socket.id;
-            let initialPlayerState = {
-                x: 50,
-                y: 50,
-                width: 50,
-                height: 50,
-                keyState: {}
+    keyEvents() {
+        document.addEventListener("keydown", (event) => {
+            const id = this.socket.id;
+            const state = this.state.state[id];
+
+            const keyState = Object.assign({}, state.keyState);
+
+            let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
+
+            keys.forEach((key) => {
+                if (event.key === key) {
+                    event.preventDefault();
+                    keyState[key] = true;
+                }
+            });
+
+            const data = {
+                id: id,
+                state: {
+                    keyState : keyState
+                }
             };
 
-            this.entities[id] = new Player(id, initialPlayerState, true);
-
-            let data = {
-                id: this.entities[id].id,
-                state: this.entities[id].state
-            };
-
-            this.socket.emit('init', data);
+            this.state.update(data);
         });
 
+
+        document.addEventListener("keyup", (event) => {
+            const id = this.socket.id;
+            const state = this.state.state[id];
+
+            const keyState = Object.assign({}, state.keyState);
+
+            delete keyState[event.key];
+
+            const data = {
+                id: id,
+                state: {
+                    keyState: keyState
+                }
+            };
+
+            this.state.update(data);
+            this.socket.emit('update', data);
+        });
+    }
+
+    socketEvents() {
         this.socket.on('state', (data) => {
             this.state.state = Object.assign({}, data);
         });
 
         this.socket.on('update', (data) => {
             console.log(this.socket.id);
-            console.table(data);
             this.state.update(data);
         });
 
@@ -45,6 +75,26 @@ export default class Game {
             this.state.destroy(id);
             delete this.entities[id];
         });
+    }
+
+    init() {
+        let id = this.socket.id;
+        let initialPlayerState = {
+            x: 50,
+            y: 50,
+            width: 50,
+            height: 50,
+            keyState: {}
+        };
+
+        this.entities[id] = new Player(id, initialPlayerState, true);
+
+        let data = {
+            id: this.entities[id].id,
+            state: this.entities[id].state
+        };
+
+        this.socket.emit('init', data);
     }
 
     step() {
@@ -65,12 +115,12 @@ export default class Game {
                         id: this.entities[key].id,
                         state: this.entities[key].state
                     };
-
-                    console.log('wrong data' , data);
                     this.state.update(data);
 
                     if (this.entities[key].controllable) {
+                        console.log(key, 'controllable')
                         this.socket.emit('update', data);
+                        console.log('update :', data)
                     }
                 }
             }

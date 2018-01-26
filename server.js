@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const io = new require('socket.io')(http);
 
 class State {
     constructor() {
@@ -18,14 +18,15 @@ class State {
 
     destroy(id) {
         delete this.state[id];
+
     }
 }
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
-});
+// app.get('/', (req, res) => {
+//     res.sendFile(__dirname + '/public/index.html');
+// });
 
 http.listen(3000, () => {
     console.log('listening on *:3000');

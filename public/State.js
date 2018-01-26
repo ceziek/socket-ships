@@ -4,14 +4,19 @@ export default class State {
     }
 
     update(obj) {
-        // console.log('OBJECT TO UPDATE', obj);
-
         const newState = Object.assign({}, this.state);
 
-        newState[obj.id] = obj.state;
+        if (!newState[obj.id]) {
+            newState[obj.id] = {}
+        }
+
+        for (let key in obj.state) {
+            if (obj.state.hasOwnProperty(key)) {
+                newState[obj.id][key] = obj.state[key];
+            }
+        }
 
         this.state = Object.assign({}, newState);
-        console.log('STATE UPDATE', this.state)
     }
 
     destroy(id) {

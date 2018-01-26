@@ -67,8 +67,12 @@ const ctx = canvas.getContext('2d');
 const socket = io('localhost:3000');
 const state = new State();
 
-const game = new Game(ctx, state, socket);
+socket.on('connect', () => {
+    const game = new Game(ctx, state, socket);
+    game.start();
+});
 
-game.start();
+
+
 
 

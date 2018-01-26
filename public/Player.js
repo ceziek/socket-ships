@@ -16,10 +16,6 @@ export default class Player {
         this.controllable = controllable;
 
         this.points = this.getPeriphery();
-
-        if (this.controllable) {
-            this.bindEvents();
-        }
     }
 
     getPeriphery() {
@@ -148,26 +144,6 @@ export default class Player {
 
     update(state) {
         this.state = Object.assign({}, state)
-    }
-
-    // TODO replace events to parent (GAME) object
-    bindEvents() {
-        document.addEventListener("keydown", (event) => {
-            let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
-
-            keys.forEach((key) => {
-                if (event.key === key) {
-                    event.preventDefault();
-                    this.state.keyState[event.key] = true;
-                }
-            });
-
-        });
-
-
-        document.addEventListener("keyup", (event) => {
-            delete this.state.keyState[event.key];
-        });
     }
 }
 
