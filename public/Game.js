@@ -18,7 +18,6 @@ export default class Game {
         document.addEventListener("keydown", (event) => {
             const id = this.socket.id;
             const state = this.state.state[id];
-
             const keyState = Object.assign({}, state.keyState);
 
             let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
@@ -44,7 +43,6 @@ export default class Game {
         document.addEventListener("keyup", (event) => {
             const id = this.socket.id;
             const state = this.state.state[id];
-
             const keyState = Object.assign({}, state.keyState);
 
             delete keyState[event.key];

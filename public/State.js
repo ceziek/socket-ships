@@ -6,7 +6,7 @@ export default class State {
     update(obj) {
         const newState = Object.assign({}, this.state);
 
-        if (!newState[obj.id]) {
+        if (!newState.hasOwnProperty(obj.id)) {
             newState[obj.id] = {}
         }
 
@@ -20,6 +20,10 @@ export default class State {
     }
 
     destroy(id) {
-        delete this.state[id];
+        const newState = Object.assign({}, this.state);
+
+        delete newState[id];
+
+        this.state = Object.assign({}, newState);
     }
 }
