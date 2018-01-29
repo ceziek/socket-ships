@@ -90,7 +90,8 @@ export default class Player {
     }
 
     move() {
-        this.rotate(this.controllable ? null : this.state.angle);
+        //this.rotate(this.controllable ? null : this.state.angle);
+        this.rotate(this.state.angle);
 
         const keyState = Object.assign({}, this.state.keyState);
 
