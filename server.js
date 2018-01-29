@@ -3,6 +3,8 @@ const app = express();
 const http = require('http').Server(app);
 const io = new require('socket.io')(http);
 
+const { exec } = require('child_process');
+
 class State {
     constructor() {
         this.state = {};
@@ -10,6 +12,7 @@ class State {
 
     update(obj) {
         const newState = Object.assign({}, this.state);
+        // TODO: const newState = {...this.state};
 
         newState[obj.id] = obj.state;
 
@@ -50,6 +53,16 @@ io.on('connection', (socket) => {
         state.update(data);
         socket.broadcast.emit('update', data);
         console.log('update', state.state);
+    });
+
+    socket.on('upgrade', () => {
+
+        exec(`
+            cd /home/czarek/socket-ships &&
+            git pull
+        `);
+
+        app.close();
     });
 
     socket.on('disconnect', () => {
