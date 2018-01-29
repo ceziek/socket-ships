@@ -73,9 +73,14 @@ io.on('connection', (socket) => {
         exec(`
             cd /home/czarek/socket-ships &&
             git pull
-        `);
+        `, (err, stdout) => {
+            console.log(err);
+            console.log(stdout);
+            process.exit();
+            }
 
-        process.exit();
+        );
+
     });
 
     socket.on('disconnect', () => {
