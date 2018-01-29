@@ -57,12 +57,25 @@ io.on('connection', (socket) => {
 
     socket.on('upgrade', () => {
 
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+        console.log('UPGRADE')
+
         exec(`
             cd /home/czarek/socket-ships &&
             git pull
         `);
 
-        app.close();
+        process.exit();
     });
 
     socket.on('disconnect', () => {
