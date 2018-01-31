@@ -1,4 +1,5 @@
 import Player from './Player.js'
+import Missile from './Missile.js'
 
 export default class Game {
     constructor(ctx, state, socket) {
@@ -12,6 +13,15 @@ export default class Game {
 
         this.socketEvents();
         this.keyEvents();
+
+        let initialMissileState = {
+            x: 50,
+            y: 50,
+            width: 20,
+            height: 5
+        };
+
+        this.missile = new Missile('14', initialMissileState);
     }
 
     keyEvents() {
@@ -76,9 +86,10 @@ export default class Game {
 
     init() {
         let id = this.socket.id;
+        let offset = 100;
         let initialPlayerState = {
-            x: 50,
-            y: 50,
+            x: offset + Math.floor(Math.random() * 600),
+            y: offset + Math.floor(Math.random() * 600),
             width: 50,
             height: 50,
         };
@@ -94,6 +105,11 @@ export default class Game {
     }
 
     step() {
+        this.missile.state.throttle = 10;
+        this.missile.state.angle = 15;
+        this.missile.move();
+        this.missile.draw(this.ctx);
+
         const state = Object.assign({}, this.state.state);
 
         for (let key in state) {
@@ -101,7 +117,11 @@ export default class Game {
                 if (!this.entities.hasOwnProperty(key)) {
                     this.entities[key] = new Player(key, state[key], false);
                 } else {
-                    this.entities[key].update(state[key])
+                    if (this.entities[key].controllable) {
+                        this.entities[key].update(state[key])
+                    } else {
+                        this.entities[key].animateToState(state[key]);
+                    }
                 }
 
                 this.entities[key].step();
