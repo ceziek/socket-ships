@@ -68,6 +68,13 @@ io.on('connection', (socket) => {
         );
     });
 
+    socket.on('clean', () => {
+
+        console.log('CLEAN');
+
+        state.state = {};
+    });
+
     socket.on('disconnect', () => {
         console.log('disconnected');
         state.destroy(socket.id);

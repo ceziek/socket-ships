@@ -1,6 +1,6 @@
 export default class Missile {
     constructor(ownerId, {x, y, width, height, angle = 0, throttle = 0}) {
-        this.owner = ownerId;
+        this.id = ownerId + '-' + Date.now().toString();
 
         this.state = {
             x,
@@ -57,6 +57,10 @@ export default class Missile {
             point.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
             point.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle))
         });
+    }
+
+    step() {
+        this.move()
     }
 
     rotate(angle) {

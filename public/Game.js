@@ -8,20 +8,10 @@ export default class Game {
         this.socket = socket;
         this.entities = {};
 
-        this.init();
-
+        this.initPlayer();
 
         this.socketEvents();
         this.keyEvents();
-
-        let initialMissileState = {
-            x: 50,
-            y: 50,
-            width: 20,
-            height: 5
-        };
-
-        this.missile = new Missile('14', initialMissileState);
     }
 
     keyEvents() {
@@ -47,8 +37,12 @@ export default class Game {
             };
 
             this.state.update(data);
-        });
 
+            if (event.key === ' ') {
+                event.preventDefault();
+                this.launchMissile();
+            }
+        });
 
         document.addEventListener("keyup", (event) => {
             const id = this.socket.id;
@@ -84,8 +78,9 @@ export default class Game {
         });
     }
 
-    init() {
+    initPlayer() {
         let id = this.socket.id;
+
         let offset = 100;
         let initialPlayerState = {
             x: offset + Math.floor(Math.random() * 600),
@@ -104,11 +99,23 @@ export default class Game {
         this.socket.emit('init', data);
     }
 
+    launchMissile() {
+        const missile = this.entities[this.socket.id].launchMissile();
+
+        const data = {
+            id: missile.id,
+            state: missile.state
+        };
+
+        this.state.update(data);
+        this.socket.emit('update', data);
+    }
+
     step() {
-        this.missile.state.throttle = 10;
-        this.missile.state.angle = 15;
-        this.missile.move();
-        this.missile.draw(this.ctx);
+        // this.missile.state.throttle = 10;
+        // this.missile.state.angle = 15;
+        // this.missile.move();
+        // this.missile.draw(this.ctx);
 
         const state = Object.assign({}, this.state.state);
 

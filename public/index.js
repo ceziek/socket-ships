@@ -17,6 +17,11 @@ window.upgrade = function() {
     socket.emit('upgrade');
 };
 
+window.clean = function() {
+    console.log('clean');
+    socket.emit('clean');
+};
+
 
 
 

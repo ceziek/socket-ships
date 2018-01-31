@@ -1,3 +1,5 @@
+import Missile from './Missile.js'
+
 export default class Player {
     constructor(id, {x, y, width, height, keyState = {}, angle = 0, throttle = 0, deviation = 0}, controllable) {
         this.id = id;
@@ -81,6 +83,7 @@ export default class Player {
                 case 'ArrowUp' :
                     this.state.throttle += 1;
                     break;
+
             }
         }
 
@@ -114,6 +117,19 @@ export default class Player {
             point.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
             point.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle))
         });
+    }
+
+    launchMissile() {
+        let initialMissileState = {
+            x: this.state.x + 50,
+            y: this.state.y + 50,
+            width: 20,
+            height: 5,
+            angle: this.state.angle,
+            throttle: 2
+        };
+
+        return new Missile('14', initialMissileState);
     }
 
     draw(ctx) {
