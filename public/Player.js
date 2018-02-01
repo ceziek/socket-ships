@@ -119,17 +119,9 @@ export default class Player {
         });
     }
 
-    launchMissile() {
-        let initialMissileState = {
-            x: this.state.x + 50,
-            y: this.state.y + 50,
-            width: 20,
-            height: 5,
-            angle: this.state.angle,
-            throttle: 2
-        };
-
-        return new Missile('14', initialMissileState);
+    animateToState(state) {
+        const newState = animateProperties(this.state, state);
+        this.update(newState);
     }
 
     draw(ctx) {
@@ -157,11 +149,6 @@ export default class Player {
         }
 
         this.state = Object.assign({}, newState);
-    }
-
-    animateToState(state) {
-        const newState = animateProperties(this.state, state);
-        this.update(newState);
     }
 }
 

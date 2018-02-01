@@ -80,4 +80,10 @@ io.on('connection', (socket) => {
         state.destroy(socket.id);
         socket.broadcast.emit('destroy', socket.id);
     });
+
+    socket.on('destroy', (data) => {
+        console.log('destroy');
+        state.destroy(data.id);
+        socket.broadcast.emit('destroy', data.id);
+    });
 });

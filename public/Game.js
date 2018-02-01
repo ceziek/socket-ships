@@ -99,8 +99,19 @@ export default class Game {
         this.socket.emit('init', data);
     }
 
-    launchMissile() {
-        const missile = this.entities[this.socket.id].launchMissile();
+    launchMissile(entity) {
+        let entityState = entity ? entity.state : this.entities[this.socket.id].state;
+
+        let initialMissileState = {
+            x: entityState.x + 65 * Math.cos(convertToRadians(entityState.angle)),
+            y: entityState.y + 65 * Math.sin(convertToRadians(entityState.angle)),
+            width: 20,
+            height: 10,
+            angle: entityState.angle,
+            throttle: 5
+        };
+
+        const missile =  new Missile(this.socket.id, initialMissileState);
 
         const data = {
             id: missile.id,
@@ -108,15 +119,22 @@ export default class Game {
         };
 
         this.state.update(data);
+        this.entities[missile.id] = missile;
         this.socket.emit('update', data);
+
+        setTimeout(() => {
+            delete this.entities[missile.id];
+            this.state.destroy(missile.id);
+
+            const data = {
+                id: missile.id
+            };
+            this.socket.emit('destroy', data);
+
+        }, 1000)
     }
 
     step() {
-        // this.missile.state.throttle = 10;
-        // this.missile.state.angle = 15;
-        // this.missile.move();
-        // this.missile.draw(this.ctx);
-
         const state = Object.assign({}, this.state.state);
 
         for (let key in state) {
@@ -237,3 +255,8 @@ function getLineFactors(sector) {
 
     return {factorA, factorB}
 }
+
+function convertToRadians(degree) {
+    return degree * (Math.PI / 180);
+}
+
