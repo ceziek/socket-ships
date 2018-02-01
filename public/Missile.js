@@ -50,12 +50,12 @@ export default class Missile {
     move() {
         this.rotate(this.state.angle);
 
-        this.state.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
-        this.state.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle));
+        this.state.x += this.state.throttle * Math.cos(convertToRadians(this.state.angle));
+        this.state.y += this.state.throttle * Math.sin(convertToRadians(this.state.angle));
 
         this.points.forEach((point) => {
-            point.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
-            point.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle))
+            point.x += this.state.throttle * Math.cos(convertToRadians(this.state.angle));
+            point.y += this.state.throttle * Math.sin(convertToRadians(this.state.angle))
         });
     }
 
