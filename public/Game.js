@@ -2,22 +2,23 @@ import Player from './Player.js'
 import Missile from './Missile.js'
 
 export default class Game {
-    constructor(ctx, state, socket) {
+    constructor(ctx, emitter) {
+        this.socketId = emitter.socketId;
         this.ctx = ctx;
-        this.state = state;
-        this.socket = socket;
+        this.emitter = emitter;
+        this.state = {};
         this.entities = {};
 
         this.initPlayer();
 
-        this.socketEvents();
         this.keyEvents();
+        this.emitterEvents();
     }
 
     keyEvents() {
         document.addEventListener("keydown", (event) => {
-            const id = this.socket.id;
-            const state = this.state.state[id];
+            const id = this.socketId;
+            const state = this.state[id];
             const keyState = Object.assign({}, state.keyState);
 
             let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
@@ -36,7 +37,7 @@ export default class Game {
                 }
             };
 
-            this.state.update(data);
+            this.emitter.emit('update', data);
 
             if (event.key === ' ') {
                 event.preventDefault();
@@ -45,8 +46,8 @@ export default class Game {
         });
 
         document.addEventListener("keyup", (event) => {
-            const id = this.socket.id;
-            const state = this.state.state[id];
+            const id = this.socketId;
+            const state = this.state[id];
             const keyState = Object.assign({}, state.keyState);
 
             delete keyState[event.key];
@@ -58,28 +59,18 @@ export default class Game {
                 }
             };
 
-            this.state.update(data);
-            this.socket.emit('update', data);
+            this.emitter.emit('update', data);
         });
     }
 
-    socketEvents() {
-        this.socket.on('state', (data) => {
-            this.state.state = Object.assign({}, data);
-        });
-
-        this.socket.on('update', (data) => {
-            this.state.update(data);
-        });
-
-        this.socket.on('destroy', (id) => {
-            this.state.destroy(id);
-            delete this.entities[id];
+    emitterEvents() {
+        this.emitter.on('state', (data) => {
+            this.state = data;
         });
     }
 
     initPlayer() {
-        let id = this.socket.id;
+        let id = this.socketId;
 
         let offset = 100;
         let initialPlayerState = {
@@ -89,18 +80,17 @@ export default class Game {
             height: 50,
         };
 
-        this.entities[id] = new Player(id, initialPlayerState, true);
-
+        let newPlayer = new Player(id, initialPlayerState, true);
         let data = {
-            id: this.entities[id].id,
-            state: this.entities[id].state
+            id: newPlayer.id,
+            state: newPlayer.state
         };
 
-        this.socket.emit('init', data);
+        this.emitter.emit('init', data);
     }
 
     launchMissile(entity) {
-        let entityState = entity ? entity.state : this.entities[this.socket.id].state;
+        let entityState = entity ? entity.state : this.entities[this.socketId].state;
 
         let initialMissileState = {
             x: entityState.x + 65 * Math.cos(convertToRadians(entityState.angle)),
@@ -111,31 +101,29 @@ export default class Game {
             throttle: 5
         };
 
-        const missile =  new Missile(this.socket.id, initialMissileState);
+        const missile =  new Missile(this.socketId, initialMissileState);
 
         const data = {
             id: missile.id,
             state: missile.state
         };
 
-        this.state.update(data);
-        this.entities[missile.id] = missile;
-        this.socket.emit('update', data);
+        this.emitter.emit('update', data);
 
         setTimeout(() => {
-            delete this.entities[missile.id];
             this.state.destroy(missile.id);
-
-            const data = {
-                id: missile.id
-            };
-            this.socket.emit('destroy', data);
-
+            this.emitter.emit('destroy', missile.id);
         }, 1000)
     }
 
     step() {
-        const state = Object.assign({}, this.state.state);
+        const state = Object.assign({}, this.state);
+
+        for (let key in this.entities) {
+            if (!state.hasOwnProperty(key)) {
+                delete this.entities[key];
+            }
+        }
 
         for (let key in state) {
             if (state.hasOwnProperty(key)) {
@@ -164,10 +152,11 @@ export default class Game {
                         id: this.entities[key].id,
                         state: this.entities[key].state
                     };
-                    this.state.update(data);
 
                     if (this.entities[key].controllable) {
-                        this.socket.emit('update', data);
+                        this.emitter.emit('update', data);
+                    } else {
+                        this.emitter.state.update(data);
                     }
                 }
             }
@@ -190,7 +179,7 @@ export default class Game {
 
     isChanged(entity) {
         let playerStr = JSON.stringify(entity.state);
-        let stateStr = JSON.stringify(this.state.state[entity.id]);
+        let stateStr = JSON.stringify(this.state[entity.id]);
 
         return playerStr !== stateStr;
     }

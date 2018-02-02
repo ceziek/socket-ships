@@ -1,23 +1,26 @@
 import State from './State.js';
 import Game from './Game.js';
+import GameEmitter from './GameEmitter.js'
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-const socket = io('http://fuku.nazwa.pl:3000');
-const state = new State();
+// const socket = io('http://fuku.nazwa.pl:3000');
+const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
-    const game = new Game(ctx, state, socket);
+    const state = new State();
+    const gameEmitter = new GameEmitter(state, socket);
+    const game = new Game(ctx, gameEmitter);
     game.start();
 });
 
-window.upgrade = function() {
+window.upgrade = function () {
     console.log('upgrade');
     socket.emit('upgrade');
 };
 
-window.clean = function() {
+window.clean = function () {
     console.log('clean');
     socket.emit('clean');
 };
