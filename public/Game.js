@@ -8,6 +8,7 @@ export default class Game {
         this.emitter = emitter;
         this.state = {};
         this.entities = {};
+        this.keyState = {};
 
         this.initPlayer();
 
@@ -26,18 +27,9 @@ export default class Game {
             keys.forEach((key) => {
                 if (event.key === key) {
                     event.preventDefault();
-                    keyState[key] = true;
+                    this.keyState[key] = true;
                 }
             });
-
-            const data = {
-                id: id,
-                state: {
-                    keyState: keyState
-                }
-            };
-
-            this.emitter.emit('update', data);
 
             if (event.key === ' ') {
                 event.preventDefault();
@@ -46,20 +38,15 @@ export default class Game {
         });
 
         document.addEventListener("keyup", (event) => {
-            const id = this.socketId;
-            const state = this.state[id];
-            const keyState = Object.assign({}, state.keyState);
+            let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
-            delete keyState[event.key];
-
-            const data = {
-                id: id,
-                state: {
-                    keyState: keyState
+            keys.forEach((key) => {
+                if (event.key === key) {
+                    event.preventDefault();
+                    delete this.keyState[event.key];
                 }
-            };
+            });
 
-            this.emitter.emit('update', data);
         });
     }
 
@@ -136,10 +123,44 @@ export default class Game {
                         this.entities[key] = new Player(key, state[key], false);
                     }
                 } else {
-                    if (this.entities[key].controllable) {
-                        this.entities[key].update(state[key])
-                    } else {
-                        this.entities[key].animateToState(state[key]);
+                    this.entities[key].update(state[key])
+
+                    // if (this.entities[key].controllable) {
+                    //     this.entities[key].update(state[key])
+                    // } else {
+                    //     this.entities[key].animateToState(state[key]);
+                    // }
+                }
+
+                if (this.entities[key].controllable) {
+                    for (let keyName in this.keyState) {
+                        switch (keyName) {
+                            case 'ArrowRight' :
+                                this.entities[key].state.deviation += 1;
+                                break;
+                            case 'ArrowLeft' :
+                                this.entities[key].state.deviation -= 1;
+                                break;
+                            case 'ArrowDown' :
+                                this.entities[key].state.throttle -= 1;
+                                break;
+                            case 'ArrowUp' :
+                                this.entities[key].state.throttle += 1;
+                                break;
+
+                        }
+                    }
+
+                    if (
+                        !this.keyState.hasOwnProperty('ArrowDown') &&
+                        !this.keyState.hasOwnProperty('ArrowUp') &&
+                        this.entities[key].state.throttle !== 0
+                    ) {
+                        if (this.entities[key].state.throttle > 0) {
+                            this.entities[key].state.throttle -= 1;
+                        } else {
+                            this.entities[key].state.throttle += 1;
+                        }
                     }
                 }
 

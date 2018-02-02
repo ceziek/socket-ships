@@ -5,8 +5,8 @@ import GameEmitter from './GameEmitter.js'
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-// const socket = io('http://fuku.nazwa.pl:3000');
-const socket = io('http://localhost:3000');
+const socket = io('http://fuku.nazwa.pl:3000');
+// const socket = io('http://localhost:3000');
 
 socket.on('connect', () => {
     const state = new State();

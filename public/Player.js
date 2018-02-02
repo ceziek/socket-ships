@@ -1,7 +1,7 @@
 import Missile from './Missile.js'
 
 export default class Player {
-    constructor(id, {x, y, width, height, keyState = {}, angle = 0, throttle = 0, deviation = 0}, controllable) {
+    constructor(id, {x, y, width, height, angle = 0, throttle = 0, deviation = 0}, controllable) {
         this.id = id;
 
         this.state = {
@@ -9,7 +9,6 @@ export default class Player {
             y,
             width,
             height,
-            keyState,
             angle,
             throttle,
             deviation
@@ -69,23 +68,7 @@ export default class Player {
     }
 
     step() {
-        for (let keyName in this.state.keyState) {
-            switch (keyName) {
-                case 'ArrowRight' :
-                    this.state.deviation += 1;
-                    break;
-                case 'ArrowLeft' :
-                    this.state.deviation -= 1;
-                    break;
-                case 'ArrowDown' :
-                    this.state.throttle -= 1;
-                    break;
-                case 'ArrowUp' :
-                    this.state.throttle += 1;
-                    break;
 
-            }
-        }
 
         this.state.angle += this.state.deviation;
 
@@ -96,19 +79,6 @@ export default class Player {
         //this.rotate(this.controllable ? null : this.state.angle);
         this.rotate(this.state.angle);
 
-        const keyState = Object.assign({}, this.state.keyState);
-
-        if (
-            !keyState.hasOwnProperty('ArrowDown') &&
-            !keyState.hasOwnProperty('ArrowUp') &&
-            this.state.throttle !== 0
-        ) {
-            if (this.state.throttle > 0) {
-                this.state.throttle -= 1;
-            } else {
-                this.state.throttle += 1;
-            }
-        }
 
         this.state.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
         this.state.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle));
@@ -156,6 +126,8 @@ function convertToRadians(degree) {
     return degree * (Math.PI / 180);
 }
 
+
+// NOT WORKING
 function animateProperties(obj, target) {
     let newObj = {};
 
@@ -166,22 +138,16 @@ function animateProperties(obj, target) {
             let prop = obj[key];
             let targetProp = target[key];
 
-            if (prop instanceof Object) {
-                if (JSON.stringify(prop) !== JSON.stringify(target)) {
-                    prop = targetProp;
-                }
-            } else {
-                if (prop !== targetProp) {
+            if (prop !== targetProp) {
+                if (prop > targetProp) {
+                    prop -= factor;
+                    if (prop < targetProp) {
+                        prop = targetProp;
+                    }
+                } else {
+                    prop += factor;
                     if (prop > targetProp) {
-                        prop -= factor;
-                        if (prop < targetProp) {
-                            prop = targetProp;
-                        }
-                    } else {
-                        prop += factor;
-                        if (prop > targetProp) {
-                            prop = targetProp;
-                        }
+                        prop = targetProp;
                     }
                 }
             }
