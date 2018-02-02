@@ -116,6 +116,7 @@ export default class Game {
         }, 1000)
     }
 
+    // TODO: Make something with this dirty method code
     step() {
         const state = Object.assign({}, this.state);
 
@@ -128,7 +129,12 @@ export default class Game {
         for (let key in state) {
             if (state.hasOwnProperty(key)) {
                 if (!this.entities.hasOwnProperty(key)) {
-                    this.entities[key] = new Player(key, state[key], false);
+                    if (key === this.socketId) {
+                        this.entities[key] = new Player(key, state[key], true);
+
+                    } else {
+                        this.entities[key] = new Player(key, state[key], false);
+                    }
                 } else {
                     if (this.entities[key].controllable) {
                         this.entities[key].update(state[key])
@@ -139,10 +145,12 @@ export default class Game {
 
                 this.entities[key].step();
 
-                for (let obstacleKey in this.entities) {
-                    if (obstacleKey !== key) {
-                        if (!checkCollision(this.entities[key].points, this.entities[obstacleKey].points)) {
-                            this.entities[key].state.throttle = -this.entities[key].state.throttle;
+                if (this.entities[key].controllable) {
+                    for (let obstacleKey in this.entities) {
+                        if (obstacleKey !== key) {
+                            if (!checkCollision(this.entities[key].points, this.entities[obstacleKey].points)) {
+                                this.entities[key].state.throttle = -this.entities[key].state.throttle;
+                            }
                         }
                     }
                 }
