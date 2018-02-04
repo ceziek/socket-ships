@@ -129,25 +129,31 @@ function convertToRadians(degree) {
 
 // NOT WORKING
 function animateProperties(obj, target) {
+
     let newObj = {};
 
     for (let key in obj) {
-        let factor = (key === 'x' || key === 'y') ? 0.1 : 1;
+        let factor = 0.5; // (key === 'x' || key === 'y') ? 0.1 : 1;
 
         if (obj.hasOwnProperty(key)) {
+
             let prop = obj[key];
             let targetProp = target[key];
 
-            if (prop !== targetProp) {
-                if (prop > targetProp) {
-                    prop -= factor;
-                    if (prop < targetProp) {
-                        prop = targetProp;
-                    }
-                } else {
-                    prop += factor;
+            if (!(key === 'x' || key === 'y')) {
+                prop = targetProp
+            } else {
+                if (prop !== targetProp) {
                     if (prop > targetProp) {
-                        prop = targetProp;
+                        prop -= factor;
+                        if (prop < targetProp) {
+                            prop = targetProp;
+                        }
+                    } else {
+                        prop += factor;
+                        if (prop > targetProp) {
+                            prop = targetProp;
+                        }
                     }
                 }
             }

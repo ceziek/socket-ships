@@ -85,7 +85,7 @@ export default class Game {
             width: 20,
             height: 10,
             angle: entityState.angle,
-            throttle: 5
+            throttle: 10
         };
 
         const missile =  new Missile(this.socketId, initialMissileState);
@@ -95,10 +95,9 @@ export default class Game {
             state: missile.state
         };
 
-        this.emitter.emit('update', data);
+        this.emitter.emit('update and emit', data);
 
         setTimeout(() => {
-            this.state.destroy(missile.id);
             this.emitter.emit('destroy', missile.id);
         }, 1000)
     }
@@ -123,13 +122,13 @@ export default class Game {
                         this.entities[key] = new Player(key, state[key], false);
                     }
                 } else {
-                    this.entities[key].update(state[key])
+                    //this.entities[key].update(state[key])
 
-                    // if (this.entities[key].controllable) {
-                    //     this.entities[key].update(state[key])
-                    // } else {
-                    //     this.entities[key].animateToState(state[key]);
-                    // }
+                    if (this.entities[key].controllable) {
+                        this.entities[key].update(state[key])
+                    } else {
+                        this.entities[key].animateToState(state[key]);
+                    }
                 }
 
                 if (this.entities[key].controllable) {
@@ -183,9 +182,9 @@ export default class Game {
                     };
 
                     if (this.entities[key].controllable) {
-                        this.emitter.emit('update', data);
+                        this.emitter.emit('update and emit', data);
                     } else {
-                        this.emitter.state.update(data);
+                        this.emitter.emit('update', data);
                     }
                 }
             }

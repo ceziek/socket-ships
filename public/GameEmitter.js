@@ -41,9 +41,14 @@ export default class GameEmitter extends Emitter {
             this.socket.emit('init', player);
         });
 
-        this.on('update', (entity) => {
+        this.on('update and emit', (entity) => {
             this.state.update(entity);
             this.socket.emit('update', entity);
+            this.emitState();
+        });
+
+        this.on('update', (entity) => {
+            this.state.update(entity);
             this.emitState();
         });
 
