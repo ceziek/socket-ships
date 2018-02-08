@@ -1,5 +1,3 @@
-import Missile from './Missile.js'
-
 export default class Player {
     constructor(id, {x, y, width, height, angle = 0, throttle = 0, deviation = 0}, controllable) {
         this.id = id;
@@ -15,7 +13,6 @@ export default class Player {
         };
 
         this.controllable = controllable;
-
         this.points = this.getPeriphery();
     }
 
@@ -68,8 +65,6 @@ export default class Player {
     }
 
     step() {
-
-
         this.state.angle += this.state.deviation;
 
         this.move();
@@ -94,12 +89,22 @@ export default class Player {
         this.update(newState);
     }
 
-    draw(ctx) {
-        const firstPoint = this.points[0];
+    draw(ctx, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
+
+
+        const points = [...this.points];
+        const pointsAdjustedToCanvas = points.map((point) => {
+            return {
+                x: point.x - canvasUpperLeftCornerX,
+                y: point.y - canvasUpperLeftCornerY
+            }
+        });
+
+        const firstPoint = pointsAdjustedToCanvas[0];
 
         ctx.beginPath();
         ctx.moveTo(firstPoint.x, firstPoint.y);
-        this.points.forEach((point, i) => {
+        pointsAdjustedToCanvas.forEach((point, i) => {
             if (i !== 0) {
                 ctx.lineTo(point.x, point.y);
             }
@@ -107,6 +112,7 @@ export default class Player {
         ctx.lineTo(firstPoint.x, firstPoint.y);
         ctx.fill();
         ctx.closePath();
+
     }
 
     update(state) {

@@ -2,48 +2,50 @@ import Player from './Player.js'
 import Missile from './Missile.js'
 
 export default class Game {
-    constructor(ctx, emitter) {
+    constructor(canvas, emitter) {
         this.socketId = emitter.socketId;
-        this.ctx = ctx;
+        this.canvas = canvas;
+        this.ctx = this.canvas.getContext('2d');
         this.emitter = emitter;
         this.state = {};
         this.entities = {};
         this.keyState = {};
+        this.missleLaunched = false;
+
+        this.gameBoard = {
+            width: 3000,
+            height: 2000
+        };
 
         this.initPlayer();
 
         this.keyEvents();
         this.emitterEvents();
+
+        this.step();
     }
 
     keyEvents() {
         document.addEventListener("keydown", (event) => {
-            const id = this.socketId;
-            const state = this.state[id];
-            const keyState = Object.assign({}, state.keyState);
-
-            let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
+            let keys = ['w', 's', 'a', 'd', ' '];
 
             keys.forEach((key) => {
                 if (event.key === key) {
                     event.preventDefault();
                     this.keyState[key] = true;
+                    console.log('keypressed', key)
                 }
             });
-
-            if (event.key === ' ') {
-                event.preventDefault();
-                this.launchMissile();
-            }
         });
 
         document.addEventListener("keyup", (event) => {
-            let keys = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'];
+            let keys = ['w', 's', 'a', 'd', ' '];
 
             keys.forEach((key) => {
                 if (event.key === key) {
                     event.preventDefault();
                     delete this.keyState[event.key];
+                    console.log('keyup', key)
                 }
             });
 
@@ -77,29 +79,38 @@ export default class Game {
     }
 
     launchMissile(entity) {
-        let entityState = entity ? entity.state : this.entities[this.socketId].state;
+        if (!this.missleLaunched) {
+            let entityState = entity ? entity.state : this.entities[this.socketId].state;
 
-        let initialMissileState = {
-            x: entityState.x + 65 * Math.cos(convertToRadians(entityState.angle)),
-            y: entityState.y + 65 * Math.sin(convertToRadians(entityState.angle)),
-            width: 20,
-            height: 10,
-            angle: entityState.angle,
-            throttle: 10
-        };
+            let initialMissileState = {
+                x: entityState.x + 65 * Math.cos(convertToRadians(entityState.angle)),
+                y: entityState.y + 65 * Math.sin(convertToRadians(entityState.angle)),
+                width: 20,
+                height: 10,
+                angle: entityState.angle,
+                throttle: 100
+            };
 
-        const missile =  new Missile(this.socketId, initialMissileState);
+            const missile = new Missile(this.socketId, initialMissileState);
 
-        const data = {
-            id: missile.id,
-            state: missile.state
-        };
+            const data = {
+                id: missile.id,
+                state: missile.state
+            };
 
-        this.emitter.emit('update and emit', data);
+            this.emitter.emit('update and emit', data);
 
-        setTimeout(() => {
-            this.emitter.emit('destroy', missile.id);
-        }, 1000)
+            this.missleLaunched = true;
+
+
+            setTimeout(() => {
+                this.missleLaunched = false;
+            }, 100);
+
+            setTimeout(() => {
+                this.emitter.emit('destroy', missile.id);
+            }, 3000)
+        }
     }
 
     // TODO: Make something with this dirty method code
@@ -134,25 +145,27 @@ export default class Game {
                 if (this.entities[key].controllable) {
                     for (let keyName in this.keyState) {
                         switch (keyName) {
-                            case 'ArrowRight' :
+                            case 'd' :
                                 this.entities[key].state.deviation += 1;
                                 break;
-                            case 'ArrowLeft' :
+                            case 'a' :
                                 this.entities[key].state.deviation -= 1;
                                 break;
-                            case 'ArrowDown' :
+                            case 's' :
                                 this.entities[key].state.throttle -= 1;
                                 break;
-                            case 'ArrowUp' :
+                            case 'w' :
                                 this.entities[key].state.throttle += 1;
                                 break;
-
+                            case ' ' :
+                                this.launchMissile();
+                                break;
                         }
                     }
 
                     if (
-                        !this.keyState.hasOwnProperty('ArrowDown') &&
-                        !this.keyState.hasOwnProperty('ArrowUp') &&
+                        !this.keyState.hasOwnProperty('w') &&
+                        !this.keyState.hasOwnProperty('s') &&
                         this.entities[key].state.throttle !== 0
                     ) {
                         if (this.entities[key].state.throttle > 0) {
@@ -192,17 +205,24 @@ export default class Game {
     }
 
     start() {
-        this.ctx.clearRect(0, 0, 1000, 800);
+        if (this.state[this.socketId]) {
 
-        this.step();
+            this.ctx.clearRect(0, 0, 1000, 800);
 
-        for (let key in this.entities) {
-            if (this.entities.hasOwnProperty(key)) {
-                this.entities[key].draw(this.ctx);
+            this.step();
+
+            const playerState = this.state[this.socketId];
+            const canvasUpperLeftCornerX = playerState.x - (this.canvas.width / 2);
+            const canvasUpperLeftCornerY = playerState.y - (this.canvas.height / 2);
+
+            for (let key in this.entities) {
+                if (this.entities.hasOwnProperty(key)) {
+                    this.entities[key].draw(this.ctx, canvasUpperLeftCornerX, canvasUpperLeftCornerY);
+                }
             }
         }
 
-        requestAnimationFrame(this.start.bind(this));
+        requestAnimationFrame(() =>  this.start());
     }
 
     isChanged(entity) {
