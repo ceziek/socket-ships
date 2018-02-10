@@ -1,6 +1,10 @@
-export default class State {
+class State {
     constructor() {
         this.state = {};
+    }
+
+    getState(id) {
+        return id ? Object.assign({},this.state[id]) : Object.assign({},this.state)
     }
 
     update(obj) {
@@ -17,6 +21,8 @@ export default class State {
         }
 
         this.state = Object.assign({}, newState);
+
+        postMessage(this.state);
     }
 
     destroy(id) {

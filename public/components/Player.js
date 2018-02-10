@@ -1,6 +1,6 @@
-export default class Missile {
-    constructor(ownerId, {x, y, width, height, angle = 0, throttle = 0}) {
-        this.id = ownerId + '-' + Date.now().toString();
+class Player {
+    constructor(id, {x, y, width, height, angle = 0, throttle = 0, deviation = 0}, controllable) {
+        this.id = id;
 
         this.state = {
             x,
@@ -8,10 +8,12 @@ export default class Missile {
             width,
             height,
             angle,
-            throttle
+            throttle,
+            deviation
         };
 
-        this.points = this.getPeriphery();
+        this.controllable = controllable;
+        this.state.points = this.getPeriphery();
     }
 
     getPeriphery() {
@@ -23,6 +25,9 @@ export default class Missile {
                 x: this.state.x + this.state.width / 2,
                 y: this.state.y - this.state.height / 2
             }, {
+                x: this.state.x + this.state.width / 2 + 15,
+                y: this.state.y
+            }, {
                 x: this.state.x + this.state.width / 2,
                 y: this.state.y + this.state.height / 2
             }, {
@@ -32,45 +37,14 @@ export default class Missile {
         ];
     }
 
-    draw(ctx) {
-        const firstPoint = this.points[0];
-
-        ctx.beginPath();
-        ctx.moveTo(firstPoint.x, firstPoint.y);
-        this.points.forEach((point, i) => {
-            if (i !== 0) {
-                ctx.lineTo(point.x, point.y);
-            }
-        });
-        ctx.lineTo(firstPoint.x, firstPoint.y);
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    move() {
-        this.rotate(this.state.angle);
-
-        this.state.x += this.state.throttle * Math.cos(convertToRadians(this.state.angle));
-        this.state.y += this.state.throttle * Math.sin(convertToRadians(this.state.angle));
-
-        this.points.forEach((point) => {
-            point.x += this.state.throttle * Math.cos(convertToRadians(this.state.angle));
-            point.y += this.state.throttle * Math.sin(convertToRadians(this.state.angle))
-        });
-    }
-
-    step() {
-        this.move()
-    }
-
     rotate(angle) {
         let state = Object.assign({}, this.state);
-        let points = angle ? this.getPeriphery() : this.points;
+        let points = angle ? this.getPeriphery() : this.state.points;
 
         state.angle = state.angle < 0 ? state.angle + 360 : state.angle;
         state.angle = state.angle > 360 ? 0 : state.angle;
 
-        let deviation = angle ? angle : state.angle;
+        let deviation = angle ? angle : state.deviation;
 
 
         points.forEach((point) => {
@@ -84,8 +58,62 @@ export default class Missile {
             point.y = rotatedY + state.y;
         });
 
-        this.points = [...points];
+        state.deviation = 0;
+
         this.update(state)
+        this.state.points = [...points];
+
+    }
+
+    step() {
+        this.state.angle += this.state.deviation;
+
+        this.move();
+    }
+
+    move() {
+        //this.rotate(this.controllable ? null : this.state.angle);
+        this.rotate(this.state.angle);
+
+
+        this.state.x += this.state.throttle / 100 * Math.cos(convertToRadians(this.state.angle));
+        this.state.y += this.state.throttle / 100 * Math.sin(convertToRadians(this.state.angle));
+
+        this.state.points.forEach((point) => {
+            point.x += this.state.throttle / 100 * Math.cos(convertToRadians(this.state.angle));
+            point.y += this.state.throttle / 100 * Math.sin(convertToRadians(this.state.angle))
+        });
+    }
+
+    animateToState(state) {
+        const newState = animateProperties(this.state, state);
+        this.update(newState);
+    }
+
+    draw(ctx, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
+
+
+        const points = [...this.state.points];
+        const pointsAdjustedToCanvas = points.map((point) => {
+            return {
+                x: point.x - canvasUpperLeftCornerX,
+                y: point.y - canvasUpperLeftCornerY
+            }
+        });
+
+        const firstPoint = pointsAdjustedToCanvas[0];
+
+        ctx.beginPath();
+        ctx.moveTo(firstPoint.x, firstPoint.y);
+        pointsAdjustedToCanvas.forEach((point, i) => {
+            if (i !== 0) {
+                ctx.lineTo(point.x, point.y);
+            }
+        });
+        ctx.lineTo(firstPoint.x, firstPoint.y);
+        ctx.fill();
+        ctx.closePath();
+
     }
 
     update(state) {
@@ -99,27 +127,28 @@ export default class Missile {
 
         this.state = Object.assign({}, newState);
     }
-
-    animateToState(state) {
-        const newState = animateProperties(this.state, state);
-        this.update(newState);
-    }
 }
 
+function convertToRadians(degree) {
+    return degree * (Math.PI / 180);
+}
+
+
+// NOT WORKING
 function animateProperties(obj, target) {
+
     let newObj = {};
 
     for (let key in obj) {
-        let factor = (key === 'x' || key === 'y') ? 0.1 : 1;
+        let factor = 0.5; // (key === 'x' || key === 'y') ? 0.1 : 1;
 
         if (obj.hasOwnProperty(key)) {
+
             let prop = obj[key];
             let targetProp = target[key];
 
-            if (prop instanceof Object) {
-                if (JSON.stringify(prop) !== JSON.stringify(target)) {
-                    prop = targetProp;
-                }
+            if (!(key === 'x' || key === 'y')) {
+                prop = targetProp
             } else {
                 if (prop !== targetProp) {
                     if (prop > targetProp) {
@@ -141,8 +170,4 @@ function animateProperties(obj, target) {
     }
 
     return Object.assign({}, newObj)
-}
-
-function convertToRadians(degree) {
-    return degree * (Math.PI / 180);
 }

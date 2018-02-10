@@ -33,7 +33,6 @@ export default class Game {
                 if (event.key === key) {
                     event.preventDefault();
                     this.keyState[key] = true;
-                    console.log('keypressed', key)
                 }
             });
         });
@@ -45,7 +44,6 @@ export default class Game {
                 if (event.key === key) {
                     event.preventDefault();
                     delete this.keyState[event.key];
-                    console.log('keyup', key)
                 }
             });
 
@@ -88,10 +86,12 @@ export default class Game {
                 width: 20,
                 height: 10,
                 angle: entityState.angle,
-                throttle: 100
+                throttle: 10
             };
 
-            const missile = new Missile(this.socketId, initialMissileState);
+            let missleId = this.socketId + '-' + Date.now().toString();
+
+            const missile = new Missile(missleId, initialMissileState);
 
             const data = {
                 id: missile.id,
@@ -100,12 +100,12 @@ export default class Game {
 
             this.emitter.emit('update and emit', data);
 
-            this.missleLaunched = true;
+            //this.missleLaunched = true;
 
 
-            setTimeout(() => {
-                this.missleLaunched = false;
-            }, 100);
+            // setTimeout(() => {
+            //     this.missleLaunched = false;
+            // }, 50);
 
             setTimeout(() => {
                 this.emitter.emit('destroy', missile.id);
@@ -130,7 +130,11 @@ export default class Game {
                         this.entities[key] = new Player(key, state[key], true);
 
                     } else {
-                        this.entities[key] = new Player(key, state[key], false);
+                        if (state[key].hasOwnProperty('type')) {
+                            this.entities[key] =  new Missile(key, state[key]);
+                        } else {
+                            this.entities[key] = new Player(key, state[key], false);
+                        }
                     }
                 } else {
                     //this.entities[key].update(state[key])
@@ -178,15 +182,18 @@ export default class Game {
 
                 this.entities[key].step();
 
-                if (this.entities[key].controllable) {
+        /*        if (this.entities[key].controllable) {
                     for (let obstacleKey in this.entities) {
                         if (obstacleKey !== key) {
-                            if (!checkCollision(this.entities[key].points, this.entities[obstacleKey].points)) {
-                                this.entities[key].state.throttle = -this.entities[key].state.throttle;
+                            if (this.entities[obstacleKey] instanceof Player) {
+                                if (!checkCollision(this.entities[key].points, this.entities[obstacleKey].points)) {
+                                    this.entities[key].state.throttle = -this.entities[key].state.throttle;
+                                }
                             }
+
                         }
                     }
-                }
+                }*/
 
                 if (this.isChanged(this.entities[key])) {
                     const data = {
