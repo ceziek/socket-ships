@@ -10,8 +10,6 @@ class GameWorker {
         this.state = new State();
         this.entities = {};
         this.keyState = {};
-
-        postMessage('worker initialized');
     }
 
     initPlayer() {
@@ -36,15 +34,15 @@ class GameWorker {
     }
 
     controlPlayer(key) {
-        const player = Object.assign( Object.create( Object.getPrototypeOf(this.entities[key])), this.entities[key]);
+        const player = Object.assign(Object.create(Object.getPrototypeOf(this.entities[key])), this.entities[key]);
 
         for (let keyName in this.keyState) {
             switch (keyName) {
                 case 'd' :
-                    player.state.deviation += 0.4;
+                    player.state.deviation += 1;
                     break;
                 case 'a' :
-                    player.state.deviation -= 0.4;
+                    player.state.deviation -= 1;
                     break;
                 case 's' :
                     player.state.throttle -= 1;
@@ -56,7 +54,7 @@ class GameWorker {
         }
         player.step();
 
-        if( isChanged(player.state, this.entities[key].state)) {
+        if (isChanged(player.state, this.entities[key].state)) {
             this.entities[key].update(player.state)
         }
     }
@@ -95,27 +93,20 @@ class GameWorker {
 
         for (let key in this.entities) {
 
-            if (isChanged(this.entities[key].state, state[key])) {
-                const entityId = key;
-                const entityState = this.entities[key].state;
+            const entityId = key;
+            const entityState = this.entities[key].state;
 
-                const data = {
-                    id: entityId,
-                    state: entityState
-                };
-                this.state.update(data)
-            }
+            const data = {
+                id: entityId,
+                state: entityState
+            };
+            this.state.update(data)
+
         }
-
-
-
-        setTimeout(() => {
-            this.gameStep()
-        }, 0)
     }
 }
 
-function isChanged(objState,targetState) {
+function isChanged(objState, targetState) {
     let playerStr = JSON.stringify(objState);
     let stateStr = JSON.stringify(targetState);
 

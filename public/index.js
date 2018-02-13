@@ -11,7 +11,8 @@ const socket = io('http://fuku.nazwa.pl:3000');
 const worker = new Worker('worker.js');
 
 let state = {};
-let keyState = {}
+let keyState = {};
+let isRendering = false;
 
 worker.onmessage = (event) => {
     state = event.data;
@@ -21,6 +22,9 @@ keyEvents();
 requestAnimationFrame(() => render());
 
 function render() {
+
+    worker.postMessage(keyState);
+
     ctx.clearRect(0, 0, 1000, 800);
 
     // const playerState = state[id];
@@ -70,7 +74,7 @@ function keyEvents() {
             }
         });
 
-        worker.postMessage(keyState);
+        // worker.postMessage(keyState);
     });
 
     document.addEventListener("keyup", (event) => {
@@ -83,7 +87,7 @@ function keyEvents() {
             }
         });
 
-        worker.postMessage(keyState)
+        // worker.postMessage(keyState)
     });
 }
 

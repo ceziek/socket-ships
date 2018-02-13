@@ -9,12 +9,10 @@ socket.on('connect', () => {
     const gameWorker = new GameWorker(socket);
     gameWorker.initPlayer();
     gameWorker.socketListener();
-    gameWorker.gameStep();
 
     self.onmessage = (event) => {
-        console.log(event.data);
         gameWorker.keyState = event.data;
-        console.log(gameWorker.keyState);
+        gameWorker.gameStep();
     }
 });
 

@@ -76,12 +76,12 @@ class Player {
         this.rotate(this.state.angle);
 
 
-        this.state.x += this.state.throttle / 100 * Math.cos(convertToRadians(this.state.angle));
-        this.state.y += this.state.throttle / 100 * Math.sin(convertToRadians(this.state.angle));
+        this.state.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
+        this.state.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle));
 
         this.state.points.forEach((point) => {
-            point.x += this.state.throttle / 100 * Math.cos(convertToRadians(this.state.angle));
-            point.y += this.state.throttle / 100 * Math.sin(convertToRadians(this.state.angle))
+            point.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
+            point.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle))
         });
     }
 
