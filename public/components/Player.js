@@ -1,3 +1,5 @@
+"use strict";
+
 class Player {
     constructor(id, {x, y, width, height, angle = 0, throttle = 0, deviation = 0}, controllable) {
         this.id = id;

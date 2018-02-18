@@ -1,3 +1,5 @@
+"use strict";
+
 import Player from './Player.js'
 import Missile from './Missile.js'
 

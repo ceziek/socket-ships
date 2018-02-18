@@ -1,113 +1,104 @@
-// import State from './components/State.js';
-// import Game from './components/Game.js';
-// import GameEmitter from './components/GameEmitter.js'
+"use strict";
 
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+class GameClient {
+    constructor(canvas, worker) {
+        this.state = {};
+        this.keyState = {};
+        this.canvas = canvas;
+        this.ctx = this.canvas.getContext('2d');
+        this.worker = worker;
 
-const socket = io('http://fuku.nazwa.pl:3000');
-// const socket = io('http://localhost:3000');
-
-const worker = new Worker('worker.js');
-
-let state = {};
-let keyState = {};
-let isRendering = false;
-
-worker.onmessage = (event) => {
-    state = event.data;
-};
-
-keyEvents();
-requestAnimationFrame(() => render());
-
-function render() {
-
-    worker.postMessage(keyState);
-
-    ctx.clearRect(0, 0, 1000, 800);
-
-    // const playerState = state[id];
-    // const canvasUpperLeftCornerX = playerState.x - (canvas.width / 2);
-    // const canvasUpperLeftCornerY = playerState.y - (canvas.height / 2);
-
-    for (let key in state) {
-        if (state[key]) {
-            draw(ctx, state[key], 0, 0);
-        }
+        this.worker.onmessage = (event) => {
+            this.state = event.data;
+        };
     }
 
-    requestAnimationFrame(() => render());
-}
+    render() {
+        const ctx = this.ctx;
+        const canvas = this.canvas;
+        const state = Object.assign({}, this.state);
 
-function draw(ctx, entity, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
-    const points = [...entity.points];
-    const pointsAdjustedToCanvas = points.map((point) => {
-        return {
-            x: point.x - canvasUpperLeftCornerX,
-            y: point.y - canvasUpperLeftCornerY
+        this.worker.postMessage(this.keyState);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let key in state) {
+            if (state.hasOwnProperty(key)) {
+                // const playerState = state[key];
+                // const canvasUpperLeftCornerX = playerState.x - (canvas.width / 2);
+                // const canvasUpperLeftCornerY = playerState.y - (canvas.height / 2);
+                this.draw(ctx, state[key], 0, 0);
+            }
         }
-    });
 
-    const firstPoint = pointsAdjustedToCanvas[0];
+        requestAnimationFrame(() => this.render());
+    }
 
-    ctx.beginPath();
-    ctx.moveTo(firstPoint.x, firstPoint.y);
-    pointsAdjustedToCanvas.forEach((point, i) => {
-        if (i !== 0) {
-            ctx.lineTo(point.x, point.y);
-        }
-    });
-    ctx.lineTo(firstPoint.x, firstPoint.y);
-    ctx.fill();
-    ctx.closePath();
-}
-
-function keyEvents() {
-    document.addEventListener("keydown", (event) => {
-        let keys = ['w', 's', 'a', 'd', ' '];
-
-        keys.forEach((key) => {
-            if (event.key === key) {
-                event.preventDefault();
-                keyState[key] = true;
+    draw(ctx, entity, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
+        const points = [...entity.points];
+        const pointsAdjustedToCanvas = points.map((point) => {
+            return {
+                x: point.x - canvasUpperLeftCornerX,
+                y: point.y - canvasUpperLeftCornerY
             }
         });
 
-        // worker.postMessage(keyState);
-    });
+        const firstPoint = pointsAdjustedToCanvas[0];
 
-    document.addEventListener("keyup", (event) => {
-        let keys = ['w', 's', 'a', 'd', ' '];
-
-        keys.forEach((key) => {
-            if (event.key === key) {
-                event.preventDefault();
-                delete keyState[event.key];
+        ctx.beginPath();
+        ctx.moveTo(firstPoint.x, firstPoint.y);
+        pointsAdjustedToCanvas.forEach((point, i) => {
+            if (i !== 0) {
+                ctx.lineTo(point.x, point.y);
             }
         });
+        ctx.lineTo(firstPoint.x, firstPoint.y);
+        ctx.fill();
+        ctx.closePath();
+    }
 
-        // worker.postMessage(keyState)
-    });
+    keyEvents() {
+        document.addEventListener("keydown", (event) => {
+            let keys = ['w', 's', 'a', 'd', ' '];
+
+            keys.forEach((key) => {
+                if (event.key === key) {
+                    event.preventDefault();
+                    this.keyState[key] = true;
+                }
+            });
+        });
+
+        document.addEventListener("keyup", (event) => {
+            let keys = ['w', 's', 'a', 'd', ' '];
+
+            keys.forEach((key) => {
+                if (event.key === key) {
+                    event.preventDefault();
+                    delete this.keyState[event.key];
+                }
+            });
+        });
+    }
 }
 
+const canvas = document.getElementById('canvas');
+const worker = new Worker('worker.js');
 
-// socket.on('connect', () => {
-//     const state = new State();
-//     const gameEmitter = new GameEmitter(state, socket);
-//     const game = new Game(canvas, gameEmitter);
-//     game.start();
-// });
-//
-// window.upgrade = function () {
-//     console.log('upgrade');
-//     socket.emit('upgrade');
-// };
-//
-// window.clean = function () {
-//     console.log('clean');
-//     socket.emit('clean');
-// };
+const gameClient = new GameClient(canvas, worker);
+gameClient.keyEvents();
+gameClient.render();
+
+
+window.upgrade = function () {
+    console.log('upgrade');
+    socket.emit('upgrade');
+};
+
+window.clean = function () {
+    console.log('clean');
+    socket.emit('clean');
+};
 
 
 

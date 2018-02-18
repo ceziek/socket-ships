@@ -1,5 +1,4 @@
-// import Player from './Player.js'
-// import Missile from './Missile.js'
+"use strict";
 
 importScripts('components/State.js');
 importScripts('components/Player.js');
@@ -34,7 +33,10 @@ class GameWorker {
     }
 
     controlPlayer(key) {
-        const player = Object.assign(Object.create(Object.getPrototypeOf(this.entities[key])), this.entities[key]);
+        const player = Object.assign(
+            Object.create(Object.getPrototypeOf(this.entities[key])),
+            this.entities[key]
+        );
 
         for (let keyName in this.keyState) {
             switch (keyName) {
@@ -54,9 +56,7 @@ class GameWorker {
         }
         player.step();
 
-        if (isChanged(player.state, this.entities[key].state)) {
-            this.entities[key].update(player.state)
-        }
+        this.entities[key].update(player.state)
     }
 
     socketListener() {
@@ -71,37 +71,40 @@ class GameWorker {
         //const canvasUpperLeftCornerX = playerState.x - (this.canvas.width / 2);
         //const canvasUpperLeftCornerY = playerState.y - (this.canvas.height / 2);
 
-        for (let key in this.entities) {
-            if (!state.hasOwnProperty(key)) {
-                delete this.entities[key];
-            }
-        }
+        this.populateEntities(state);
 
+        for (let key in this.entities) {
+            const entityId = key;
+
+            if (!state.hasOwnProperty(entityId)) {
+                delete this.entities[entityId];
+            }
+
+            if (entityId === playerId) {
+                this.controlPlayer(playerId);
+            } else {
+                this.entities[entityId].step();
+            }
+
+            this.saveEntityState(key)
+        }
+    }
+
+    saveEntityState(entityId) {
+        const entityState = this.entities[entityId].state;
+
+        const data = {
+            id: entityId,
+            state: entityState
+        };
+        this.state.update(data)
+    }
+
+    populateEntities(state) {
         for (let key in state) {
             if (!this.entities.hasOwnProperty(key)) {
                 this.entities[key] = new Player(key, state[key], true);
             }
-        }
-
-        for (let key in this.entities) {
-            if (key === playerId) {
-                this.controlPlayer(playerId);
-            } else {
-                this.entities[key].step();
-            }
-        }
-
-        for (let key in this.entities) {
-
-            const entityId = key;
-            const entityState = this.entities[key].state;
-
-            const data = {
-                id: entityId,
-                state: entityState
-            };
-            this.state.update(data)
-
         }
     }
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 export default class Emitter {
     constructor() {
         this.elRef = document.getElementById('eventEmitter');
