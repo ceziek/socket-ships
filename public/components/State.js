@@ -33,5 +33,7 @@ class State {
         delete newState[id];
 
         this.state = Object.assign({}, newState);
+
+        postMessage(this.state);
     }
 }

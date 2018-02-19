@@ -3,8 +3,8 @@
 importScripts('components/Entity.js');
 
 class Player extends Entity {
-    constructor(id, {x, y, width, height, angle = 0, throttle = 0}, bounds) {
-        super(id, {x, y, width, height, angle}, bounds);
+    constructor(id, {x, y, width, height, angle = 0, deviation = 0, throttle = 0}, bounds) {
+        super(id, {x, y, width, height, angle, deviation}, bounds);
 
         this.state.throttle = throttle;
     }

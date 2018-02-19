@@ -77,7 +77,11 @@ class GameWorker {
     socketListener() {
         this.socket.on('update', (data) => {
             this.state.update(data);
-        })
+        });
+
+        this.socket.on('destroy', (id) => {
+            this.state.destroy(id);
+        });
     }
 
     gameStep() {
@@ -106,19 +110,28 @@ class GameWorker {
     }
 
     saveEntityState(entityId) {
+        const playerId = this.socket.id;
         const entityState = this.entities[entityId].state;
 
         const data = {
             id: entityId,
             state: entityState
         };
-        this.state.update(data)
+        this.state.update(data);
+
+        if (entityId === playerId) {
+            this.socket.emit('update', data);
+        }
     }
 
     populateEntities(state) {
         for (let key in state) {
-            if (state.hasOwnProperty(key) && !this.entities.hasOwnProperty(key)) {
-                this.entities[key] = new Player(key, state[key], playerBounds);
+            if (state.hasOwnProperty(key)) {
+                if (!this.entities.hasOwnProperty(key)) {
+                    this.entities[key] = new Player(key, state[key], playerBounds);
+                } else {
+                    this.entities[key].update(state[key]);
+                }
             }
         }
     }
