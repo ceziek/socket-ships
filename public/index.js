@@ -34,8 +34,8 @@ class GameClient {
         requestAnimationFrame(() => this.render());
     }
 
-    draw(ctx, entity, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
-        const points = [...entity.points];
+    draw(ctx, entityState, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
+        const points = [...entityState.points];
         const pointsAdjustedToCanvas = points.map((point) => {
             return {
                 x: point.x - canvasUpperLeftCornerX,

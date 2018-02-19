@@ -3,6 +3,34 @@
 importScripts('components/State.js');
 importScripts('components/Player.js');
 
+const offset = 100;
+
+const initialPlayerState = {
+    x: offset + Math.floor(Math.random() * 600),
+    y: offset + Math.floor(Math.random() * 600),
+    width: 50,
+    height: 50,
+};
+
+const playerBounds = [
+    {
+        x: initialPlayerState.x - initialPlayerState.width / 2,
+        y: initialPlayerState.y - initialPlayerState.height / 2
+    }, {
+        x: initialPlayerState.x + initialPlayerState.width / 2,
+        y: initialPlayerState.y - initialPlayerState.height / 2
+    }, {
+        x: initialPlayerState.x + initialPlayerState.width / 2 + 15,
+        y: initialPlayerState.y
+    }, {
+        x: initialPlayerState.x + initialPlayerState.width / 2,
+        y: initialPlayerState.y + initialPlayerState.height / 2
+    }, {
+        x: initialPlayerState.x - initialPlayerState.width / 2,
+        y: initialPlayerState.y + initialPlayerState.height / 2
+    }
+];
+
 class GameWorker {
     constructor(socket) {
         this.socket = socket;
@@ -14,15 +42,7 @@ class GameWorker {
     initPlayer() {
         const id = this.socket.id;
 
-        const offset = 100;
-        const initialPlayerState = {
-            x: offset + Math.floor(Math.random() * 600),
-            y: offset + Math.floor(Math.random() * 600),
-            width: 50,
-            height: 50,
-        };
-
-        const newPlayer = new Player(id, initialPlayerState, true);
+        const newPlayer = new Player(id, initialPlayerState, playerBounds);
         const data = {
             id: newPlayer.id,
             state: newPlayer.state
@@ -33,10 +53,7 @@ class GameWorker {
     }
 
     controlPlayer(key) {
-        const player = Object.assign(
-            Object.create(Object.getPrototypeOf(this.entities[key])),
-            this.entities[key]
-        );
+        const player = this.entities[key];
 
         for (let keyName in this.keyState) {
             switch (keyName) {
@@ -54,9 +71,7 @@ class GameWorker {
                     break;
             }
         }
-        player.step();
 
-        this.entities[key].update(player.state)
     }
 
     socketListener() {
@@ -82,9 +97,9 @@ class GameWorker {
 
             if (entityId === playerId) {
                 this.controlPlayer(playerId);
-            } else {
-                this.entities[entityId].step();
             }
+
+            this.entities[entityId].step();
 
             this.saveEntityState(key)
         }
@@ -102,8 +117,8 @@ class GameWorker {
 
     populateEntities(state) {
         for (let key in state) {
-            if (!this.entities.hasOwnProperty(key)) {
-                this.entities[key] = new Player(key, state[key], true);
+            if (state.hasOwnProperty(key) && !this.entities.hasOwnProperty(key)) {
+                this.entities[key] = new Player(key, state[key], playerBounds);
             }
         }
     }
