@@ -17,15 +17,11 @@ class Entity {
 
         this.state.points = this.getBounds();
 
-        this.step();
+        this.rotate();
     }
 
     getBounds() {
         return eval(this.bounds);
-    }
-
-    step() {
-        this.rotate();
     }
 
     rotate() {

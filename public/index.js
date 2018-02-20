@@ -35,6 +35,8 @@ class GameClient {
     }
 
     draw(ctx, entityState, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
+        console.log(entityState);
+
         const points = [...entityState.points];
         const pointsAdjustedToCanvas = points.map((point) => {
             return {
@@ -89,16 +91,6 @@ const gameClient = new GameClient(canvas, worker);
 gameClient.keyEvents();
 gameClient.render();
 
-
-window.upgrade = function () {
-    console.log('upgrade');
-    socket.emit('upgrade');
-};
-
-window.clean = function () {
-    console.log('clean');
-    socket.emit('clean');
-};
 
 
 
