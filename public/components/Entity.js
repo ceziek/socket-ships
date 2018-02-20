@@ -13,15 +13,21 @@ class Entity {
             deviation
         };
 
-        this.state.points = bounds;
+        this.bounds = bounds;
 
-        // this.rotate();
+        this.state.points = this.getBounds();
+
+        this.rotate();
+    }
+
+    getBounds() {
+        return eval(this.bounds);
     }
 
     rotate() {
         let state = Object.assign({}, this.state);
-        let points = state.points;
-        let deviation = state.deviation;
+        let points = this.getBounds();
+        let deviation = state.angle;
 
         points.forEach((point) => {
             let tempX = point.x - state.x;
@@ -34,19 +40,11 @@ class Entity {
             point.y = rotatedY + state.y;
         });
 
-        state.angle += deviation;
-
-        state.angle = state.angle < 0 ? state.angle + 360 : state.angle;
-        state.angle = state.angle > 360 ? 0 : state.angle;
-
-        state.deviation = 0;
-
-        this.update(state);
         this.state.points = [...points];
     }
 
     draw(ctx, canvasUpperLeftCornerX, canvasUpperLeftCornerY) {
-        const points = [...this.state.points];
+        const points = this.getBounds();
         const pointsAdjustedToCanvas = points.map((point) => {
             return {
                 x: point.x - canvasUpperLeftCornerX,
@@ -55,6 +53,10 @@ class Entity {
         });
 
         const firstPoint = pointsAdjustedToCanvas[0];
+
+        ctx.save();
+        ctx.moveTo(this.state.x, this.state.y);
+        ctx.rotate(convertToRadians(this.state.angle));
 
         ctx.beginPath();
         ctx.moveTo(firstPoint.x, firstPoint.y);
@@ -66,6 +68,8 @@ class Entity {
         ctx.lineTo(firstPoint.x, firstPoint.y);
         ctx.fill();
         ctx.closePath();
+
+        ctx.restore()
     }
 
     update(state) {
@@ -79,4 +83,8 @@ class Entity {
 
         this.state = Object.assign({}, newState);
     }
+}
+
+function convertToRadians(degree) {
+    return degree * (Math.PI / 180);
 }

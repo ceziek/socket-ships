@@ -1,6 +1,6 @@
 "use strict";
 
-import Player from '../Player.js'
+import Player from '../Ship.js'
 import Missile from './Missile.js'
 
 export default class Game {

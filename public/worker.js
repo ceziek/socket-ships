@@ -12,9 +12,17 @@ socket.on('connect', () => {
     gameWorker.socketListener();
 
     self.onmessage = (event) => {
-        gameWorker.keyState = event.data;
-        gameWorker.gameStep();
+        switch (event.data.type) {
+            case 'clean' :
+                socket.emit('clean');
+                break;
+            case 'upgrade':
+                socket.emit('upgrade');
+                break;
+            default :
+                gameWorker.keyState = event.data;
+                gameWorker.gameStep();
+                break;
+        }
     }
 });
-
-

@@ -10,6 +10,7 @@ class State {
     }
 
     update(obj) {
+        console.log('update');
         const newState = Object.assign({}, this.state);
 
         if (!newState.hasOwnProperty(obj.id)) {
@@ -28,6 +29,8 @@ class State {
     }
 
     destroy(id) {
+        console.log('destroy -----------------------');
+
         const newState = Object.assign({}, this.state);
 
         delete newState[id];

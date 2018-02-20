@@ -3,7 +3,7 @@ const app = express();
 const http = require('http').Server(app);
 const io = new require('socket.io')(http);
 
-const { exec } = require('child_process');
+const {exec} = require('child_process');
 
 class State {
     constructor() {
@@ -61,10 +61,10 @@ io.on('connection', (socket) => {
         console.log('UPGRADE');
 
         exec(`cd /home/czarek/socket-ships && git pull`, (err, stdout) => {
-            console.log(err);
-            console.log(stdout);
+                console.log(err);
+                console.log(stdout);
 
-            process.exit();
+                process.exit();
             }
         );
     });
@@ -83,8 +83,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('destroy', (id) => {
-        console.log('destroy');
+        console.log('destroy ', id);
         state.destroy(id);
-        socket.broadcast.emit('destroy', id);
+        io.emit('destroy', id);
     });
 });

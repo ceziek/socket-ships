@@ -2,7 +2,7 @@
 
 importScripts('components/Entity.js');
 
-class Player extends Entity {
+class Ship extends Entity {
     constructor(id, {x, y, width, height, angle = 0, deviation = 0, throttle = 0}, bounds) {
         super(id, {x, y, width, height, angle, deviation}, bounds);
 
@@ -10,7 +10,7 @@ class Player extends Entity {
     }
 
     step() {
-        this.rotate();
+        super.rotate();
 
         this.state.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
         this.state.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle));

@@ -10,15 +10,17 @@ class GameClient {
 
         this.worker.onmessage = (event) => {
             this.state = event.data;
+            console.log(this.state);
         };
     }
 
     render() {
+        this.worker.postMessage(this.keyState);
+
         const ctx = this.ctx;
         const canvas = this.canvas;
-        const state = Object.assign({}, this.state);
+        const state = JSON.parse(JSON.stringify(this.state));
 
-        this.worker.postMessage(this.keyState);
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -92,16 +94,13 @@ gameClient.render();
 
 window.upgrade = function () {
     console.log('upgrade');
-    socket.emit('upgrade');
+    worker.postMessage({type: 'upgrade'});
 };
 
 window.clean = function () {
     console.log('clean');
-    socket.emit('clean');
-};
-
-
-
+    worker.postMessage({type: 'clean'});
+}
 
 
 
