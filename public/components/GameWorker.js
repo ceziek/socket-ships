@@ -12,24 +12,24 @@ const initialPlayerState = {
     height: 50,
 };
 
-const playerBounds = [
+const playerBounds = `[
     {
-        x: initialPlayerState.x - initialPlayerState.width / 2,
-        y: initialPlayerState.y - initialPlayerState.height / 2
+        x: this.state.x - this.state.width / 2,
+        y: this.state.y - this.state.height / 2
     }, {
-        x: initialPlayerState.x + initialPlayerState.width / 2,
-        y: initialPlayerState.y - initialPlayerState.height / 2
+        x: this.state.x + this.state.width / 2,
+        y: this.state.y - this.state.height / 2
     }, {
-        x: initialPlayerState.x + initialPlayerState.width / 2 + 15,
-        y: initialPlayerState.y
+        x: this.state.x + this.state.width / 2 + 15,
+        y: this.state.y
     }, {
-        x: initialPlayerState.x + initialPlayerState.width / 2,
-        y: initialPlayerState.y + initialPlayerState.height / 2
+        x: this.state.x + this.state.width / 2,
+        y: this.state.y + this.state.height / 2
     }, {
-        x: initialPlayerState.x - initialPlayerState.width / 2,
-        y: initialPlayerState.y + initialPlayerState.height / 2
+        x: this.state.x - this.state.width / 2,
+        y: this.state.y + this.state.height / 2
     }
-];
+]`;
 
 class GameWorker {
     constructor(socket) {
@@ -58,10 +58,10 @@ class GameWorker {
         for (let keyName in this.keyState) {
             switch (keyName) {
                 case 'd' :
-                    player.state.deviation += 1;
+                    player.state.angle += 1;
                     break;
                 case 'a' :
-                    player.state.deviation -= 1;
+                    player.state.angle -= 1;
                     break;
                 case 's' :
                     player.state.throttle -= 1;
@@ -72,6 +72,8 @@ class GameWorker {
             }
         }
 
+        player.state.angle = player.state.angle < 0 ? player.state.angle + 360 : player.state.angle;
+        player.state.angle = player.state.angle > 360 ? 0 : player.state.angle;
     }
 
     socketListener() {

@@ -10,7 +10,7 @@ class Player extends Entity {
     }
 
     step() {
-        this.rotate();
+        super.step();
 
         this.state.x += this.state.throttle / 10 * Math.cos(convertToRadians(this.state.angle));
         this.state.y += this.state.throttle / 10 * Math.sin(convertToRadians(this.state.angle));
