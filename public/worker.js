@@ -26,3 +26,7 @@ socket.on('connect', () => {
         }
     }
 });
+
+socket.on('disconnect', () => {
+    socket.emit('destroy', socket.id)
+});

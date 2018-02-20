@@ -81,9 +81,8 @@ class GameWorker {
 
     socketListener() {
         this.socket.on('update', (data) => {
-            console.log('socket update')
+            console.log('socket update', data)
             this.state.update(data);
-            console.log(data);
         });
 
         this.socket.on('destroy', (id) => {
